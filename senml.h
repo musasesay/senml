@@ -81,7 +81,10 @@ typedef struct {
 	char              *name;
 	char              *unit;
 	double             time;
-	unsigned int       update_time;
+	unsigned int       update_time;  // draft says this value is given in seconds, but perhaps
+					 // fractions of a second should be supported as well?
+					 // would have to change unsigned int to double then FIXME
+	// xxx value_sum  FIXME clear definition missing
 	senml_value_type_t value_type;
 	union {
 		double            value_f;
@@ -99,6 +102,8 @@ typedef struct {
 } senml_pack_t;
 
 
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  * Decodes a SenML pack in JSON format and writes the results in \p pack. The memory necessary to 
  * store the decoded records must be allocated in advance.
@@ -109,16 +114,7 @@ typedef struct {
  * @return 0 on success, -1 if \p input is not a valid SenML document, or -2 if \p input contains
  * more records than <code>pack->records</code> can hold.
  */
-int senml_decode_json_s(const char *input, senml_pack_t *pack);
-
-
-/**
- * Decodes a SenML pack in JSON format and writes the results in \p pack. The memory necessary to 
- * store the decoded records will be allocated automatically.
- * @param[in] input The JSON document containing the SenML pack.
- * @return A valid pointer to a <code>senml_pack_t</code> elements, or NULL on failure.
- */
-senml_pack_t *senml_decode_json_d(const char *input);
+// int senml_decode_json_s(const char *input, senml_pack_t *pack);
 
 
 /**
@@ -130,16 +126,47 @@ senml_pack_t *senml_decode_json_d(const char *input);
  * @return 0 on success, -1 if \p pack contains invalid data or options, or -2 if not enough memory
  * was allocated.
  */
-int senml_encode_json_s(const senml_pack_t *pack, char *output, size_t len);
+// int senml_encode_json_s(const senml_pack_t *pack, char *output, size_t len);
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 
 /**
- * Creates a SenML document in JSON format. The memory necessary to store the resulting JSON will
- * be allocated automatically.
+ * Decodes a SenML pack in JSON format and writes the results in \p pack. The memory necessary to 
+ * store the decoded records will be allocated automatically.
+ * @param[in] input The JSON document containing the SenML pack.
+ * @return A valid pointer to a <code>senml_pack_t</code> elements, or NULL on failure.
+ */
+senml_pack_t *senml_decode_json(const char *input);
+
+
+/**
+ * Creates a SenML document in JSON format. The memory necessary to store the resulting JSON 
+ * document will be allocated automatically.
  * @param[in] pack The <code>senml_pack_t</code> elements that contains the SenML records.
  * @return A valid pointer to the finished JSON document, or NULL on failure.
  */
-char *senml_encode_json_d(const senml_pack_t *pack);
+char *senml_encode_json(const senml_pack_t *pack);
+
+
+/**
+ * Decodes a SenML pack in CBOR format and writes the results in \p pack. The memory necessary to 
+ * store the decoded records will be allocated automatically.
+ * @param[in] input The CBOR document containing the SenML pack.
+ * @param[in] len The length of \p input in bytes.
+ * @return A valid pointer to a <code>senml_pack_t</code> elements, or NULL on failure.
+ */
+senml_pack_t *senml_decode_cbor(const unsigned char *input, size_t len);
+
+
+/**
+ * Creates a SenML document in CBOR format. The memory necessary to store the resulting CBOR
+ * document will be allocated automatically.
+ * @param[in] pack The <code>senml_pack_t</code> elements that contains the SenML records.
+ * @param[out] len The length of the resulting CBOR document.
+ * @return A valid pointer to the finished JSON document, or NULL on failure.
+ */
+unsigned char *senml_encode_cbor(const senml_pack_t *pack, size_t *len);
 
 
 /**
