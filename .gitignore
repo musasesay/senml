@@ -2,3 +2,5 @@
 *.o
 *.gch
 *-test.c
+*-test
+
