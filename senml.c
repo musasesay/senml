@@ -7,13 +7,6 @@
 #include <jansson.h>
 #include <cbor.h>
 
-int senml_decode_json_s(const char *input, senml_pack_t *pack)
-{
-	(void)input;
-	(void)pack;
-	return 0;
-}
-
 
 static inline bool senml_is_base_info(json_t *record)
 {
@@ -28,11 +21,16 @@ static inline bool senml_is_base_info(json_t *record)
 }
 
 
-senml_pack_t *senml_decode_json(const char *input)
+senml_pack_t *senml_decode_json(const char *input, size_t len)
 {
 	json_error_t json_error;
 	
-	json_t *json_root = json_loads(input, 0, &json_error);
+	json_t *json_root = NULL;
+	
+	if (len> 0)
+		json_root = json_loadb(input, len, 0, &json_error);
+	else
+		json_root = json_loads(input, 0, &json_error);
 	
 	if (!json_root) {
 		fprintf(stderr, "ERROR: on line %d: %s\n", json_error.line, json_error.text);
@@ -253,8 +251,11 @@ char *senml_encode_json(const senml_pack_t *pack)
 
 senml_pack_t *senml_decode_cbor(const unsigned char *input, size_t len)
 {
-	(void)input;
-	(void)len;
+	struct cbor_load_result load_result;
+	cbor_item_t *array = cbor_load(input, len, &load_result);
+	
+	cbor_describe(array, stdout);
+	
 	return NULL;
 }
 
@@ -354,9 +355,13 @@ unsigned char *senml_encode_cbor(const senml_pack_t *pack, size_t *len)
 			// FIXME handle binary value
 		
 		cbor_array_push(array, map);
+		cbor_decref(&map);
 	}
 	
 	*len = cbor_serialize_alloc(array, &result, &buf_size);
+	
+// 	cbor_decref(&base_info_map);
+	cbor_decref(&array);
 	
 	return result;
 }

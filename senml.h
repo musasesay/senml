@@ -137,7 +137,7 @@ typedef struct {
  * @param[in] input The JSON document containing the SenML pack.
  * @return A valid pointer to a <code>senml_pack_t</code> elements, or NULL on failure.
  */
-senml_pack_t *senml_decode_json(const char *input);
+senml_pack_t *senml_decode_json(const char *input, size_t len);
 
 
 /**
