@@ -57,8 +57,6 @@ senml_pack_t *senml_decode_json(const char *input, size_t len)
 	if (senml_is_base_info(json_record)) {
 		pack->base_info = malloc(sizeof(senml_base_info_t));
 		pack->base_info->base_value_type = SENML_TYPE_UNDEF;
-		i++;
-		(pack->num)--;
 		
 		object = json_object_get(json_record, SJ_VERSION);
 		
