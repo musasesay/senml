@@ -75,7 +75,7 @@ typedef struct {
 		char             *base_value_s;    //!< A base value of type string
 		bool              base_value_b;    //!< A boolean base value (FIXME is this sensible?)
 		senml_bin_data_t  base_value_bin;  //!< A binary base value (FIXME is this sensible?)
-	};
+	} base_value;
 } senml_base_info_t;
 
 
@@ -92,7 +92,7 @@ typedef struct {
 		char             *value_s;   //!< A value of type string
 		bool              value_b;   //!< A boolean value
 		senml_bin_data_t  value_bin; //!< A binary value (FIXME don't know how to handle this yet)
-	};
+	} value;
 } senml_record_t;
 
 

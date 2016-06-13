@@ -132,8 +132,8 @@ senml_pack_t *senml_decode_json(const char *input, size_t len)
 		object = json_object_get(json_record, SJ_VALUE);
 		
 		if (object) {
-			pack->records[index].value_type = SENML_TYPE_FLOAT;
-			pack->records[index].value_f    = json_real_value(object);
+			pack->records[index].value_type    = SENML_TYPE_FLOAT;
+			pack->records[index].value.value_f = json_real_value(object);
 			continue;
 		}
 		
@@ -143,9 +143,9 @@ senml_pack_t *senml_decode_json(const char *input, size_t len)
 			pack->records[index].value_type = SENML_TYPE_BOOL;
 			
 			if (json_is_true(object)) {
-				pack->records[index].value_b = true;
+				pack->records[index].value.value_b = true;
 			} else if (json_is_false(object)) {
-				pack->records[index].value_b = false;
+				pack->records[index].value.value_b = false;
 			} else {
 				fprintf(stderr, "ERROR: vb is not boolean value\n");
 				goto error;
@@ -157,9 +157,9 @@ senml_pack_t *senml_decode_json(const char *input, size_t len)
 		object = json_object_get(json_record, SJ_STRING_VALUE);
 		
 		if (object) {
-			pack->records[index].value_type = SENML_TYPE_STRING;
-			pack->records[index].value_s    = malloc(json_string_length(object) + 1);
-			strcpy(pack->records[index].value_s, json_string_value(object));
+			pack->records[index].value_type    = SENML_TYPE_STRING;
+			pack->records[index].value.value_s = malloc(json_string_length(object) + 1);
+			strcpy(pack->records[index].value.value_s, json_string_value(object));
 			continue;
 		}
 		
@@ -227,13 +227,13 @@ char *senml_encode_json(const senml_pack_t *pack)
 					    json_real(pack->records[i].update_time));
 		
 		if (pack->records[i].value_type == SENML_TYPE_FLOAT)
-			json_object_set_new(object, SJ_VALUE, json_real(pack->records[i].value_f));
+			json_object_set_new(object, SJ_VALUE, json_real(pack->records[i].value.value_f));
 		else if (pack->records[i].value_type == SENML_TYPE_STRING)
 			json_object_set_new(object, SJ_STRING_VALUE,
-					    json_string(pack->records[i].value_s));
+					    json_string(pack->records[i].value.value_s));
 		else if (pack->records[i].value_type == SENML_TYPE_BOOL)
 			json_object_set_new(object, SJ_BOOL_VALUE,
-					    pack->records[i].value_b ? json_true() : json_false());
+					    pack->records[i].value.value_b ? json_true() : json_false());
 // 		else if (pack->records[i].value_type == SENML_TYPE_BINARY)
 			// FIXME handle binary value
 		
@@ -339,17 +339,17 @@ unsigned char *senml_encode_cbor(const senml_pack_t *pack, size_t *len)
 		if (pack->records[i].value_type == SENML_TYPE_FLOAT)
 			cbor_map_add(map, (struct cbor_pair){
 				.key   = cbor_build_uint8(SC_VALUE),
-				.value = cbor_build_float8(pack->records[i].value_f)
+				.value = cbor_build_float8(pack->records[i].value.value_f)
 			});
 		else if (pack->records[i].value_type == SENML_TYPE_STRING)
 			cbor_map_add(map, (struct cbor_pair){
 				.key   = cbor_build_uint8(SC_STRING_VALUE),
-				.value = cbor_build_string(pack->records[i].value_s)
+				.value = cbor_build_string(pack->records[i].value.value_s)
 			});
 		else if (pack->records[i].value_type == SENML_TYPE_BOOL)
 			cbor_map_add(map, (struct cbor_pair){
 				.key   = cbor_build_uint8(SC_UPDATE_TIME),
-				.value = cbor_build_bool(pack->records[i].value_b)
+				.value = cbor_build_bool(pack->records[i].value.value_b)
 			});
 // 		else if (pack->records[i].value_type == SENML_TYPE_BINARY)
 			// FIXME handle binary value
@@ -375,11 +375,11 @@ void senml_print_base_info(const senml_base_info_t *base_info)
 	printf("Base Unit:\t%s\n", base_info->base_unit ? base_info->base_unit : "NULL");
 
 	if (base_info->base_value_type == SENML_TYPE_FLOAT)
-		printf("Base Value:\t%f\n", base_info->base_value_f);
+		printf("Base Value:\t%f\n", base_info->base_value.base_value_f);
 	else if (base_info->base_value_type == SENML_TYPE_STRING)
-		printf("Base Value:\t%s\n", base_info->base_value_s);
+		printf("Base Value:\t%s\n", base_info->base_value.base_value_s);
 	else if (base_info->base_value_type == SENML_TYPE_BOOL)
-		printf("Base Value:\t%s\n", base_info->base_value_b ? "true" : "false");
+		printf("Base Value:\t%s\n", base_info->base_value.base_value_b ? "true" : "false");
 	
 	printf("\n");
 }
@@ -393,11 +393,11 @@ void senml_print_record(const senml_record_t *record)
 	printf("Update Time:\t%u\n", record->update_time);
 	
 	if (record->value_type == SENML_TYPE_FLOAT)
-		printf("Value:\t\t%f\n", record->value_f);
+		printf("Value:\t\t%f\n", record->value.value_f);
 	else if (record->value_type == SENML_TYPE_STRING)
-		printf("Value:\t\t%s\n", record->value_s);
+		printf("Value:\t\t%s\n", record->value.value_s);
 	else if (record->value_type == SENML_TYPE_BOOL)
-		printf("Value:\t\t%s\n", record->value_b ? "true" : "false");
+		printf("Value:\t\t%s\n", record->value.value_b ? "true" : "false");
 	
 	printf("\n");
 }
