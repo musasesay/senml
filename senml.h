@@ -6,99 +6,101 @@
 #include <stddef.h>
 
 
-#define SENML_SUPPORTED_VERSION  (5)
+#ifdef __cplusplus
+extern "C" {
+#endif  // __cplusplus
 
 
-/*
- * Definitions of valid SenML keys in JSON representation
- */
-#define SJ_VERSION       "bver"
-#define SJ_BASE_NAME     "bn"
-#define SJ_BASE_TIME     "bt"
-#define SJ_BASE_UNIT     "bu"
-#define SJ_BASE_VALUE    "bv"
-#define SJ_NAME          "n"
-#define SJ_UNIT          "u"
-#define SJ_VALUE         "v"
-#define SJ_STRING_VALUE  "vs"
-#define SJ_BOOL_VALUE    "vb"
-#define SJ_VALUE_SUM     "s"
-#define SJ_TIME          "t"
-#define SJ_UPDATE_TIME   "ut"
-#define SJ_DATA_VALUE    "vd"
+#define SENML_SUPPORTED_VERSION (5)    //!< The highest SenML version this implementation supports
 
 
-/*
- * Definitions of valid SenML keys in CBOR representation
- */
-#define SC_VERSION       (-1)
-#define SC_BASE_NAME     (-2)
-#define SC_BASE_TIME     (-3)
-#define SC_BASE_UNIT     (-4)
-#define SC_BASE_VALUE    (-5)
-#define SC_NAME          (0)
-#define SC_UNIT          (1)
-#define SC_VALUE         (2)
-#define SC_STRING_VALUE  (3)
-#define SC_BOOL_VALUE    (4)
-#define SC_VALUE_SUM     (5)
-#define SC_TIME          (6)
-#define SC_UPDATE_TIME   (7)
-#define SC_DATA_VALUE    (8)
+#define SJ_VERSION       "bver" //!< Key for the version attribute in JSON documents
+#define SJ_BASE_NAME     "bn"   //!< Key for the base name attribute in JSON documents
+#define SJ_BASE_TIME     "bt"   //!< Key for the base time attribute in JSON documents
+#define SJ_BASE_UNIT     "bu"   //!< Key for the base unit attribute in JSON documents
+#define SJ_BASE_VALUE    "bv"   //!< Key for the base value attribute in JSON documents
+#define SJ_NAME          "n"    //!< Key for the name attribute in JSON documents
+#define SJ_UNIT          "u"    //!< Key for the unit attribute in JSON documents
+#define SJ_VALUE         "v"    //!< Key for the value attribute in JSON documents
+#define SJ_STRING_VALUE  "vs"   //!< Key for the string value attribute in JSON documents
+#define SJ_BOOL_VALUE    "vb"   //!< Key for the boolean value attribute in JSON documents
+#define SJ_VALUE_SUM     "s"    //!< Key for the value sum attribute in JSON documents
+#define SJ_TIME          "t"    //!< Key for the time attribute in JSON documents
+#define SJ_UPDATE_TIME   "ut"   //!< Key for the update time attribute in JSON documents
+#define SJ_DATA_VALUE    "vd"   //!< Key for the data value attribute in JSON documents
 
 
+#define SC_VERSION       (-1)   //!< Key for the version attribute in CBOR documents
+#define SC_BASE_NAME     (-2)   //!< Key for the base name attribute in CBOR documents
+#define SC_BASE_TIME     (-3)   //!< Key for the base time attribute in CBOR documents
+#define SC_BASE_UNIT     (-4)   //!< Key for the base unit attribute in CBOR documents
+#define SC_BASE_VALUE    (-5)   //!< Key for the base value attribute in CBOR documents
+#define SC_NAME          (0)    //!< Key for the name attribute in CBOR documents
+#define SC_UNIT          (1)    //!< Key for the unit attribute in CBOR documents
+#define SC_VALUE         (2)    //!< Key for the value attribute in CBOR documents
+#define SC_STRING_VALUE  (3)    //!< Key for the string value attribute in CBOR documents
+#define SC_BOOL_VALUE    (4)    //!< Key for the boolean value attribute in CBOR documents
+#define SC_VALUE_SUM     (5)    //!< Key for the value sum attribute in CBOR documents
+#define SC_TIME          (6)    //!< Key for the time attribute in CBOR documents
+#define SC_UPDATE_TIME   (7)    //!< Key for the update time attribute in CBOR documents
+#define SC_DATA_VALUE    (8)    //!< Key for the data value attribute in CBOR documents
+
+
+/*! The different data types SenML supports */
 typedef enum {
-	SENML_TYPE_UNDEF  = 0,
-	SENML_TYPE_FLOAT  = 1,
-	SENML_TYPE_STRING = 2,
-	SENML_TYPE_BOOL   = 3,
-	SENML_TYPE_BINARY = 4
+	SENML_TYPE_UNDEF  = 0,  //!< Placeholder for when no value is provided
+	SENML_TYPE_FLOAT  = 1,  //!< Indicates a float value
+	SENML_TYPE_STRING = 2,  //!< Indicates a string value
+	SENML_TYPE_BOOL   = 3,  //!< Indicates a boolean value
+	SENML_TYPE_BINARY = 4   //!< Indicates a binary (data) value
 } senml_value_type_t;
 
 
+/*! Buffer that holds arbitrary binary data */
 typedef struct {
-	uint8_t *p;
-	size_t   len;
+	uint8_t *p;     //!< Pointer to the actual data
+	size_t   len;   //!< Size of the data in bytes
 } senml_bin_data_t;
 
 
+/*! struct that contains base information which applies to all subsequent entries */
 typedef struct {
-	uint8_t             version;    // defaults to 5
-	char               *base_name;  // optional, may be NULL
-	double              base_time;  // optional, may be 0
-	char               *base_unit;  // optional, may be NULL
-	senml_value_type_t  base_value_type;
+	uint8_t             version;         //!< SenML version of this pack
+	char               *base_name;       //!< Concatenated with name attribute gives sensor's UID
+	double              base_time;       //!< Update time values are relative to this time
+	char               *base_unit;       //!< When all values have the same unit, set this field
+	senml_value_type_t  base_value_type; //!< Indicates which type the base value is of
 	union {
-		double            base_value_f;
-		char             *base_value_s;
-		bool              base_value_b;    // FIXME is this sensible?
-		senml_bin_data_t  base_value_bin;  // FIXME is this sensible?
+		double            base_value_f;    //!< A base value of type float
+		char             *base_value_s;    //!< A base value of type string
+		bool              base_value_b;    //!< A boolean base value (FIXME is this sensible?)
+		senml_bin_data_t  base_value_bin;  //!< A binary base value (FIXME is this sensible?)
 	};
 } senml_base_info_t;
 
 
+/*! struct that contains the values of a SenML record */
 typedef struct {
-	char              *name;
-	char              *unit;
-	double             time;
-	unsigned int       update_time;  // draft says this value is given in seconds, but perhaps
-					 // fractions of a second should be supported as well?
-					 // would have to change unsigned int to double then FIXME
-	// xxx value_sum  FIXME clear definition missing
-	senml_value_type_t value_type;
+	char              *name;        //!< Sensor's name, will be appended to base name if provided
+	char              *unit;        //!< Unit of the measurement
+	double             time;        //!< Time (seconds since unix epoch) of the measurement
+	unsigned int       update_time; //!< Time before sensor provides an updated measurement
+	// [type]          value_sum    // FIXME clear definition missing
+	senml_value_type_t value_type;  //!< Indicates which type the base value is of
 	union {
-		double            value_f;
-		char             *value_s;
-		bool              value_b;
-		senml_bin_data_t  value_bin;  // FIXME don't know how to handle this yet
+		double            value_f;   //!< A value of type float
+		char             *value_s;   //!< A value of type string
+		bool              value_b;   //!< A boolean value
+		senml_bin_data_t  value_bin; //!< A binary value (FIXME don't know how to handle this yet)
 	};
 } senml_record_t;
 
 
+/*! struct that holds a SenML pack (optional base info and 1..n records) */
 typedef struct {
-	senml_base_info_t  *base_info;
-	senml_record_t     *records;
-	size_t              num;
+	senml_base_info_t  *base_info;  //!< Pointer to the base info, may be NULL
+	senml_record_t     *records;    //!< Pointer to the beginning of an array of records
+	size_t              num;        //!< Number of records in the array
 } senml_pack_t;
 
 
@@ -190,4 +192,8 @@ void senml_print_record(const senml_record_t *record);
 void senml_print_pack(const senml_pack_t *pack);
 
 
-#endif /* SENML_H */
+#ifdef __cplusplus
+}
+#endif  // __cplusplus
+
+#endif  // SENML_H
