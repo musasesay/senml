@@ -10,7 +10,7 @@
 
 static inline bool senml_is_base_info(json_t *record)
 {
-	if (json_object_get(record, SJ_VERSION) ||
+	if (json_object_get(record, SJ_VERSION)   ||
 	    json_object_get(record, SJ_BASE_NAME) ||
 	    json_object_get(record, SJ_BASE_TIME) ||
 	    json_object_get(record, SJ_BASE_UNIT) ||
@@ -27,7 +27,7 @@ senml_pack_t *senml_decode_json(const char *input, size_t len)
 	
 	json_t *json_root = NULL;
 	
-	if (len> 0)
+	if (len > 0)
 		json_root = json_loadb(input, len, 0, &json_error);
 	else
 		json_root = json_loads(input, 0, &json_error);
@@ -43,7 +43,7 @@ senml_pack_t *senml_decode_json(const char *input, size_t len)
 		return NULL;
 	}
 	
-	senml_pack_t       *pack      = malloc(sizeof(senml_pack_t));
+	senml_pack_t *pack = malloc(sizeof(senml_pack_t));
 	
 	pack->base_info = NULL;
 	pack->records   = malloc(sizeof(senml_record_t) * json_array_size(json_root));
